@@ -1,0 +1,13 @@
+{
+    "name": "scaleplan/di",
+    "description": "Dependency injection technique implementation",
+    "autoload": {
+        "psr-4": {
+            "Scaleplan\\DependencyInjection\\": "src/"
+        }
+    },
+    "require": {
+        "php": ">=7.0",
+        "symfony/yaml": "~3.0"
+    }
+}
