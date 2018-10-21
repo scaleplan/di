@@ -2,6 +2,7 @@
 
 namespace Scaleplan\DependencyInjection;
 
+use Scaleplan\DependencyInjection\Exceptions\DependencyInjectionException;
 use Symfony\Component\Yaml\Yaml;
 
 /**
@@ -29,15 +30,25 @@ class DependencyInjection
      * @param array $args
      *
      * @return null|object
+     * @throws DependencyInjectionException
      */
     public static function getContainer(string $interfaceName, array $args = []) : ?object
     {
+        if (!interface_exists($interfaceName) || !class_exists($interfaceName)) {
+            throw new DependencyInjectionException("Parameter $interfaceName must be interface name or class name");
+        }
+
         if (empty($containerClassName = static::$containers[$interfaceName])) {
             return null;
         }
 
         try {
-            return (new \ReflectionClass($containerClassName))->newInstanceArgs($args);
+            $refClass = new \ReflectionClass($containerClassName);
+            if (!$refClass->implementsInterface($interfaceName)) {
+                return null;
+            }
+
+            return $refClass->newInstanceArgs($args);
         } catch (\ReflectionException $e) {
             return null;
         }
@@ -49,6 +60,7 @@ class DependencyInjection
  * @param array $args
  *
  * @return null|object
+ * @throws DependencyInjectionException
  */
 function get_container(string $interfaceName, array $args = []) : ?object
 {
