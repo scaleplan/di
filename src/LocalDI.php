@@ -13,6 +13,8 @@ class LocalDI
 {
     public const FABRIC_METHOD_NAME = 'getInstance';
 
+    public const CONTAINER_DATA_SEPARATOR = '::';
+
     /**
      * @param string $interfaceName
      * @param array $args
@@ -26,18 +28,25 @@ class LocalDI
     public static function getLocalContainer(
         string $interfaceName,
         array $args = [],
-        string $fabricMethodName = self::FABRIC_METHOD_NAME
+        string $fabricMethodName = null
     ) : object
     {
         if (!interface_exists($interfaceName) || !class_exists($interfaceName)) {
             throw new DependencyInjectionException("Parameter $interfaceName must be interface name or class name");
         }
 
-        if (empty($containerClassName = DependencyInjection::getContainers()[$interfaceName] ?? null)) {
+        if (empty($container = DependencyInjection::getContainers()[$interfaceName] ?? null)) {
             return null;
         }
 
+        [$containerClassName, $containerFabricMethodName] = explode('::', $container);
+
         $refClass = new \ReflectionClass($containerClassName);
+        $fabricMethodName = $fabricMethodName ?? $containerFabricMethodName;
+        if ($fabricMethodName) {
+            return static::getContainerByFabric($refClass, $interfaceName, $fabricMethodName, $args);
+        }
+
         if (!$refClass->implementsInterface($interfaceName)) {
             throw new DependencyInjectionException("Object must implements or extends $interfaceName");
         }
@@ -46,7 +55,7 @@ class LocalDI
             return $refClass->newInstanceArgs($args);
         }
 
-        return static::getContainerByFabric($refClass, $interfaceName, $fabricMethodName, $args);
+        return static::getContainerByFabric($refClass, $interfaceName, static::FABRIC_METHOD_NAME, $args);
     }
 
     /**
@@ -78,9 +87,7 @@ class LocalDI
             throw new DependencyInjectionException('Fabric method not allowed');
         }
 
-        if (!$method->getReturnType()
-            || !(($object = $method->invokeArgs(null, $args)) instanceof $interfaceName))
-        {
+        if (!$method->getReturnType() || !(($object = $method->invokeArgs(null, $args)) instanceof $interfaceName)) {
             throw new DependencyInjectionException(
                 "Объект возвращаемый фабричным методом должен реализовывать интерфейс $interfaceName"
             );
