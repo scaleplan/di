@@ -4,6 +4,7 @@ namespace Scaleplan\DependencyInjection;
 
 use Lmc\HttpConstants\Header;
 use Scaleplan\DependencyInjection\Exceptions\DependencyInjectionException;
+use Scaleplan\DependencyInjection\Exceptions\ParameterMustBeDTOException;
 use Scaleplan\DependencyInjection\Exceptions\RemoteUrlInvalidException;
 use Scaleplan\DTO\DTO;
 use Scaleplan\Http\Request;
@@ -82,8 +83,8 @@ class RemoteDI
     protected function __construct(string $dtoName)
     {
         if (!class_exists($dtoName) || !is_subclass_of($dtoName, DTO::class)) {
-            throw new DependencyInjectionException(
-                "Parameter $dtoName must be class name and this class must extends " . DTO::class . ' class'
+            throw new ParameterMustBeDTOException(
+                "Parameter '$dtoName' must be class name and this class must extends " . DTO::class . ' class'
             );
         }
 

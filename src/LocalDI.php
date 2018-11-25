@@ -2,7 +2,12 @@
 
 namespace Scaleplan\DependencyInjection;
 
+use Scaleplan\DependencyInjection\Exceptions\ContainerNotImplementsException;
 use Scaleplan\DependencyInjection\Exceptions\DependencyInjectionException;
+use Scaleplan\DependencyInjection\Exceptions\FactoryMethodInvalidException;
+use Scaleplan\DependencyInjection\Exceptions\FactoryMethodNotAllowedException;
+use Scaleplan\DependencyInjection\Exceptions\FactoryMethodNotFoundException;
+use Scaleplan\DependencyInjection\Exceptions\ParameterMustBeInterfaceNameOrClassNameException;
 
 /**
  * Class LocalDI
@@ -11,14 +16,14 @@ use Scaleplan\DependencyInjection\Exceptions\DependencyInjectionException;
  */
 class LocalDI
 {
-    public const FABRIC_METHOD_NAME = 'getInstance';
+    public const FACTORY_METHOD_NAME = 'getInstance';
 
     public const CONTAINER_DATA_SEPARATOR = '::';
 
     /**
      * @param string $interfaceName
      * @param array $args
-     * @param string|null $fabricMethodName
+     * @param string|null $factoryMethodName
      *
      * @return object
      *
@@ -28,68 +33,70 @@ class LocalDI
     public static function getLocalContainer(
         string $interfaceName,
         array $args = [],
-        string $fabricMethodName = null
+        string $factoryMethodName = null
     ) : object
     {
         if (!interface_exists($interfaceName) || !class_exists($interfaceName)) {
-            throw new DependencyInjectionException("Parameter $interfaceName must be interface name or class name");
+            throw new ParameterMustBeInterfaceNameOrClassNameException(
+                "Parameter $interfaceName must be interface name or class name"
+            );
         }
 
         if (empty($container = DependencyInjection::getContainers()[$interfaceName] ?? null)) {
             return null;
         }
 
-        [$containerClassName, $containerFabricMethodName] = explode('::', $container);
-
-        $refClass = new \ReflectionClass($containerClassName);
-        $fabricMethodName = $fabricMethodName ?? $containerFabricMethodName;
-        if ($fabricMethodName) {
-            return static::getContainerByFabric($refClass, $interfaceName, $fabricMethodName, $args);
+        if (!class_exists($container) || !is_subclass_of($container, $interfaceName)) {
+            throw new ContainerNotImplementsException("Object must implements or extends $interfaceName");
         }
 
-        if (!$refClass->implementsInterface($interfaceName)) {
-            throw new DependencyInjectionException("Object must implements or extends $interfaceName");
+        [$containerClassName, $containerFactoryMethodName] = explode('::', $container);
+
+        $refClass = new \ReflectionClass($containerClassName);
+        $factoryMethodName = $factoryMethodName ?? $containerFactoryMethodName;
+        if ($factoryMethodName) {
+            return static::getContainerByFactory($refClass, $interfaceName, $factoryMethodName, $args);
         }
 
         if ($refClass->isInstantiable()) {
             return $refClass->newInstanceArgs($args);
         }
 
-        return static::getContainerByFabric($refClass, $interfaceName, static::FABRIC_METHOD_NAME, $args);
+        return static::getContainerByFactory($refClass, $interfaceName, static::FACTORY_METHOD_NAME, $args);
     }
 
     /**
      * @param \ReflectionClass $refClass
      * @param string $interfaceName
+     * @param string $factoryMethodName
      * @param array $args
-     * @param string $fabricMethodName
      *
      * @return object
      *
      * @throws DependencyInjectionException
+     * @throws \ReflectionException
      */
-    protected static function getContainerByFabric(
+    protected static function getContainerByFactory(
         \ReflectionClass $refClass,
         string $interfaceName,
-        string $fabricMethodName,
+        string $factoryMethodName,
         array $args = []
     ) : object
     {
-        if (!$refClass->hasMethod($fabricMethodName)) {
-            throw new DependencyInjectionException(
-                "Class without public constructor must have a fabric method "
-                . static::FABRIC_METHOD_NAME
+        if (!$refClass->hasMethod($factoryMethodName)) {
+            throw new FactoryMethodNotFoundException(
+                "Class without public constructor must have a factory method " . static::FACTORY_METHOD_NAME
             );
         }
 
-        $method = $refClass->getMethod($fabricMethodName);
+        $method = $refClass->getMethod($factoryMethodName);
         if (!$method->isStatic() || !$method->isPublic()) {
-            throw new DependencyInjectionException('Fabric method not allowed');
+            throw new FactoryMethodNotAllowedException();
         }
 
         if (!$method->getReturnType() || !(($object = $method->invokeArgs(null, $args)) instanceof $interfaceName)) {
-            throw new DependencyInjectionException(
-                "Объект возвращаемый фабричным методом должен реализовывать интерфейс $interfaceName"
+            throw new FactoryMethodInvalidException(
+                "The object returned by the factory method must implement the interface $interfaceName."
             );
         }
 
