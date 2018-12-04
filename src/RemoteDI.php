@@ -92,17 +92,17 @@ class RemoteDI
             return null;
         }
 
-        if (preg_match(static::REMOTE_CONTAINER_TEMPLATE, $signature, $matches) === false) {
+        if (preg_match(static::REMOTE_CONTAINER_TEMPLATE, $signature, $matches) === false || empty($matches[1])) {
             throw new RemoteUrlInvalidException();
         }
 
         if ($matches[2]) {
             $this->token = $matches[1];
             $this->url = $matches[2];
+        } else {
+            $this->token = null;
+            $this->url = $matches[1];
         }
-
-        $this->token = null;
-        $this->url = $matches[1];
         $this->dtoName = $dtoName;
     }
 
@@ -120,6 +120,8 @@ class RemoteDI
         if (!$request) {
             $request = new Request($this->url, $args);
             $request->addHeader(Header::AUTHORIZATION, $this->token);
+        } else {
+            $request->setParams($args);
         }
 
         return $request->send();
