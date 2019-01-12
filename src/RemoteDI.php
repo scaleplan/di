@@ -73,14 +73,20 @@ class RemoteDI
     protected $dtoName;
 
     /**
+     * @var bool
+     */
+    protected $allowCacheValue;
+
+    /**
      * RemoteDI constructor.
      *
      * @param string $dtoName
+     * @param bool $allowCacheValue
      *
-     * @throws DependencyInjectionException
+     * @throws ParameterMustBeDTOException
      * @throws RemoteUrlInvalidException
      */
-    protected function __construct(string $dtoName)
+    protected function __construct(string $dtoName, bool $allowCacheValue = true)
     {
         if (!class_exists($dtoName) || !is_subclass_of($dtoName, DTO::class)) {
             throw new ParameterMustBeDTOException(
@@ -104,6 +110,16 @@ class RemoteDI
             $this->url = $matches[1];
         }
         $this->dtoName = $dtoName;
+
+        $this->allowCacheValue = $allowCacheValue;
+    }
+
+    /**
+     * @param bool $allowCacheValue
+     */
+    public function setAllowCacheValue(bool $allowCacheValue) : void
+    {
+        $this->allowCacheValue = $allowCacheValue;
     }
 
     /**
@@ -124,7 +140,7 @@ class RemoteDI
             $request->setParams($args);
         }
 
-        return $request->send();
+        return $request->send($this->allowCacheValue);
     }
 
     /**
@@ -148,6 +164,7 @@ class RemoteDI
     /**
      * @param string $dtoName
      * @param array $args
+     * @param bool $allowCacheValue
      *
      * @return DTO
      *
@@ -156,9 +173,10 @@ class RemoteDI
      * @throws \Scaleplan\DTO\Exceptions\ValidationException
      * @throws \Scaleplan\Http\Exceptions\RemoteServiceNotAvailableException
      */
-    public static function getRemoteContainer(string $dtoName, array $args = []) : DTO
+    public static function getRemoteContainer(string $dtoName, array $args = [], bool $allowCacheValue = true) : DTO
     {
         $instance = static::getInstance($dtoName);
+        $instance->setAllowCacheValue($allowCacheValue);
         return $instance->getContainer($args);
     }
 }
