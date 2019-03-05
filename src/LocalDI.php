@@ -23,19 +23,22 @@ class LocalDI
     /**
      * @param string $interfaceName
      * @param array $args
+     * @param bool $isStatic
      * @param string|null $factoryMethodName
      *
-     * @return object
+     * @return \object|null|string
      *
+     * @throws ContainerNotImplementsException
      * @throws DependencyInjectionException
+     * @throws ParameterMustBeInterfaceNameOrClassNameException
      * @throws \ReflectionException
      */
     public static function getLocalContainer(
         string $interfaceName,
         array $args = [],
+        \bool $isStatic = false,
         string $factoryMethodName = null
-    ) : object
-    {
+    ) {
         if (!interface_exists($interfaceName) || !class_exists($interfaceName)) {
             throw new ParameterMustBeInterfaceNameOrClassNameException(
                 "Parameter $interfaceName must be interface name or class name"
@@ -51,6 +54,10 @@ class LocalDI
         }
 
         [$containerClassName, $containerFactoryMethodName] = explode('::', $container);
+
+        if ($isStatic) {
+            return $containerClassName;
+        }
 
         $refClass = new \ReflectionClass($containerClassName);
         $factoryMethodName = $factoryMethodName ?? $containerFactoryMethodName;
@@ -71,7 +78,7 @@ class LocalDI
      * @param string $factoryMethodName
      * @param array $args
      *
-     * @return object
+     * @return \object
      *
      * @throws DependencyInjectionException
      * @throws \ReflectionException
@@ -81,8 +88,7 @@ class LocalDI
         string $interfaceName,
         string $factoryMethodName,
         array $args = []
-    ) : object
-    {
+    ) : \object {
         if (!$refClass->hasMethod($factoryMethodName)) {
             throw new FactoryMethodNotFoundException(
                 "Class without public constructor must have a factory method " . static::FACTORY_METHOD_NAME
