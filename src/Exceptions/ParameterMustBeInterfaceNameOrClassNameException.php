@@ -2,8 +2,6 @@
 
 namespace Scaleplan\DependencyInjection\Exceptions;
 
-use Scaleplan\DTO\DTO;
-
 /**
  * Class ParameterMustBeDTOException
  *

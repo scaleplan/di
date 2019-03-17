@@ -4,7 +4,6 @@ namespace Scaleplan\DependencyInjection;
 
 use Scaleplan\DependencyInjection\Exceptions\ContainerTypeNotSupportingException;
 use Scaleplan\DependencyInjection\Exceptions\DependencyInjectionException;
-use Scaleplan\DTO\DTO;
 
 /**
  * Class DependencyInjection
@@ -26,9 +25,9 @@ class DependencyInjection
     /**
      * @param array $containers
      */
-    public static function init(array $containers)
+    public static function addContainers(array $containers) : void
     {
-        static::$containers = $containers;
+        static::$containers = array_merge(static::$containers, $containers);
     }
 
     /**
@@ -46,13 +45,13 @@ class DependencyInjection
      * @param bool $allowCached
      * @param string|null $factoryMethodName
      *
-     * @return \object|null|DTO
+     * @return object|null
      *
+     * @throws ContainerTypeNotSupportingException
      * @throws DependencyInjectionException
-     * @throws Exceptions\RemoteUrlInvalidException
+     * @throws Exceptions\ParameterMustBeInterfaceNameOrClassNameException
+     * @throws Exceptions\ReturnTypeMustImplementsInterfaceException
      * @throws \ReflectionException
-     * @throws \Scaleplan\DTO\Exceptions\ValidationException
-     * @throws \Scaleplan\Http\Exceptions\RemoteServiceNotAvailableException
      */
     protected static function getContainer(
         string $interfaceName,
@@ -60,30 +59,29 @@ class DependencyInjection
         \string $type = 'local',
         \bool $allowCached = true,
         string $factoryMethodName = null
-    ) : ?\object {
+    )
+    {
         $cacheKey = "$interfaceName::$factoryMethodName:" . serialize($args);
-        if (empty(static::$cache[$cacheKey]) && $allowCached) {
+        if ($allowCached && empty(static::$cache[$cacheKey])) {
             return static::$cache[$cacheKey];
         }
 
         switch ($type) {
             case 'local':
-                $container = LocalDI::getLocalContainer($interfaceName, $args, false, $factoryMethodName);
-                break;
-
-            case 'remote':
-                $container = RemoteDI::getRemoteContainer($interfaceName, $args);
+                $di = new LocalDI($interfaceName, $args, false, $factoryMethodName);
+                $container = $di->getContainer();
                 break;
 
             case 'static':
-                $container = LocalDI::getLocalContainer($interfaceName, $args, true, $factoryMethodName);
+                $di = new LocalDI($interfaceName, $args, true, $factoryMethodName);
+                $container = $di->getContainer();
                 break;
 
             default:
                 throw new ContainerTypeNotSupportingException();
         }
 
-        if (empty(static::$cache[$cacheKey]) && $container) {
+        if ($container && empty(static::$cache[$cacheKey])) {
             static::$cache[$cacheKey] = $container;
         }
 
@@ -96,39 +94,22 @@ class DependencyInjection
      * @param bool $allowCached
      * @param string|null $factoryMethodName
      *
-     * @return \object|null
+     * @return object|null
      *
+     * @throws ContainerTypeNotSupportingException
      * @throws DependencyInjectionException
-     * @throws Exceptions\RemoteUrlInvalidException
+     * @throws Exceptions\ParameterMustBeInterfaceNameOrClassNameException
+     * @throws Exceptions\ReturnTypeMustImplementsInterfaceException
      * @throws \ReflectionException
-     * @throws \Scaleplan\DTO\Exceptions\ValidationException
-     * @throws \Scaleplan\Http\Exceptions\RemoteServiceNotAvailableException
      */
     public static function getLocalContainer(
         string $interfaceName,
         array $args = [],
         \bool $allowCached = true,
         string $factoryMethodName = null
-    ) : ?\object {
-        return static::getContainer($interfaceName, $args, 'local', $allowCached, $factoryMethodName);
-    }
-
-    /**
-     * @param string $dtoName
-     * @param array $args
-     * @param bool $allowCached
-     *
-     * @return DTO|null
-     *
-     * @throws DependencyInjectionException
-     * @throws Exceptions\RemoteUrlInvalidException
-     * @throws \ReflectionException
-     * @throws \Scaleplan\DTO\Exceptions\ValidationException
-     * @throws \Scaleplan\Http\Exceptions\RemoteServiceNotAvailableException
-     */
-    public static function getRemoteContainer(string $dtoName, array $args = [], $allowCached = true) : ?DTO
+    )
     {
-        return static::getContainer($dtoName, $args, 'remote', $allowCached);
+        return static::getContainer($interfaceName, $args, 'local', $allowCached, $factoryMethodName);
     }
 
     /**
@@ -136,11 +117,11 @@ class DependencyInjection
      *
      * @return string|null
      *
+     * @throws ContainerTypeNotSupportingException
      * @throws DependencyInjectionException
-     * @throws Exceptions\RemoteUrlInvalidException
+     * @throws Exceptions\ParameterMustBeInterfaceNameOrClassNameException
+     * @throws Exceptions\ReturnTypeMustImplementsInterfaceException
      * @throws \ReflectionException
-     * @throws \Scaleplan\DTO\Exceptions\ValidationException
-     * @throws \Scaleplan\Http\Exceptions\RemoteServiceNotAvailableException
      */
     public static function getStaticContainer(string $interfaceName) : ?string
     {
@@ -154,41 +135,23 @@ class DependencyInjection
  * @param bool $allowCached
  * @param string|null $factoryMethodName
  *
- * @return \object|null
+ * @return object|null
  *
+ * @throws ContainerTypeNotSupportingException
  * @throws DependencyInjectionException
- * @throws Exceptions\RemoteUrlInvalidException
+ * @throws Exceptions\ParameterMustBeInterfaceNameOrClassNameException
+ * @throws Exceptions\ReturnTypeMustImplementsInterfaceException
  * @throws \ReflectionException
- * @throws \Scaleplan\DTO\Exceptions\ValidationException
- * @throws \Scaleplan\Http\Exceptions\RemoteServiceNotAvailableException
  */
-function get_local_container(
+function get_container(
     string $interfaceName,
     array $args = [],
     \bool $allowCached = true,
     string $factoryMethodName = null
-) : ?\object
+)
 {
     return DependencyInjection::getLocalContainer($interfaceName, $args, $allowCached, $factoryMethodName);
 
-}
-
-/**
- * @param string $dtoName
- * @param array $args
- * @param bool $allowCached
- *
- * @return DTO
- *
- * @throws DependencyInjectionException
- * @throws Exceptions\RemoteUrlInvalidException
- * @throws \ReflectionException
- * @throws \Scaleplan\DTO\Exceptions\ValidationException
- * @throws \Scaleplan\Http\Exceptions\RemoteServiceNotAvailableException
- */
-function get_remote_container(string $dtoName, array $args = [], bool $allowCached = true) : ?DTO
-{
-    return DependencyInjection::getRemoteContainer($dtoName, $args, $allowCached);
 }
 
 /**
@@ -196,11 +159,11 @@ function get_remote_container(string $dtoName, array $args = [], bool $allowCach
  *
  * @return string|null
  *
+ * @throws ContainerTypeNotSupportingException
  * @throws DependencyInjectionException
- * @throws Exceptions\RemoteUrlInvalidException
+ * @throws Exceptions\ParameterMustBeInterfaceNameOrClassNameException
+ * @throws Exceptions\ReturnTypeMustImplementsInterfaceException
  * @throws \ReflectionException
- * @throws \Scaleplan\DTO\Exceptions\ValidationException
- * @throws \Scaleplan\Http\Exceptions\RemoteServiceNotAvailableException
  */
 function get_static_container(string $interfaceName) : ?string
 {
