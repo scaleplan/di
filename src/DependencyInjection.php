@@ -45,7 +45,7 @@ class DependencyInjection
      * @param bool $allowCached
      * @param string|null $factoryMethodName
      *
-     * @return object|null
+     * @return object|string
      *
      * @throws ContainerTypeNotSupportingException
      * @throws DependencyInjectionException
@@ -94,7 +94,7 @@ class DependencyInjection
      * @param bool $allowCached
      * @param string|null $factoryMethodName
      *
-     * @return object|null
+     * @return object
      *
      * @throws ContainerTypeNotSupportingException
      * @throws DependencyInjectionException
@@ -115,7 +115,7 @@ class DependencyInjection
     /**
      * @param string $interfaceName
      *
-     * @return string|null
+     * @return string
      *
      * @throws ContainerTypeNotSupportingException
      * @throws DependencyInjectionException
@@ -135,7 +135,7 @@ class DependencyInjection
  * @param bool $allowCached
  * @param string|null $factoryMethodName
  *
- * @return object|null
+ * @return object
  *
  * @throws ContainerTypeNotSupportingException
  * @throws DependencyInjectionException
@@ -157,7 +157,7 @@ function get_container(
 /**
  * @param string $interfaceName
  *
- * @return string|null
+ * @return string
  *
  * @throws ContainerTypeNotSupportingException
  * @throws DependencyInjectionException

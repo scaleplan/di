@@ -142,7 +142,7 @@ class LocalDI
     }
 
     /**
-     * @return mixed|null
+     * @return object|string
      *
      * @throws DependencyInjectionException
      * @throws ReturnTypeMustImplementsInterfaceException
