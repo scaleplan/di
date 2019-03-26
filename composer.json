@@ -2,6 +2,9 @@
     "name": "scaleplan/di",
     "description": "Dependency injection technique implementation",
     "autoload": {
+        "files": [
+            "src/functions.php"
+        ],
         "psr-4": {
             "Scaleplan\\DependencyInjection\\": "src/"
         }

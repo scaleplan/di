@@ -15,27 +15,57 @@ class DependencyInjection
     /**
      * @var array
      */
-    protected static $containers = [];
+    protected static $cache = [];
 
     /**
-     * @var array
+     * @param array $containers
      */
-    protected static $cache = [];
+    protected static function init(array $containers) : void
+    {
+        LocalDI::init($containers);
+    }
 
     /**
      * @param array $containers
      */
     public static function addContainers(array $containers) : void
     {
-        static::$containers = array_merge(static::$containers, $containers);
+        LocalDI::addContainers($containers);
     }
 
     /**
+     * @param string $dirPath
+     */
+    public static function loadContainersFromDir(string $dirPath) : void
+    {
+        foreach (static::getRecursivePaths($dirPath) as $file) {
+            LocalDI::addContainers(include $file);
+        }
+    }
+
+    /**
+     * Найти все файлы в каталоге, включая вложенные директории
+     *
+     * @param string $dirPath - путь к каталогу
+     *
      * @return array
      */
-    public static function getContainers() : array
+    protected static function getRecursivePaths(string $dirPath) : array
     {
-        return static::$containers;
+        $dir = rtrim($dirPath, '/\ ');
+        $paths = scandir($dir, SCANDIR_SORT_NONE);
+        unset($paths[0], $paths[1]);
+        $result = [];
+
+        foreach ($paths as &$path) {
+            $result += array_map(function ($item) use ($path, $dir) {
+                return "$dir/$path/$item";
+            }, static::getRecursivePaths("$dir/$path"));
+        }
+
+        unset($path);
+
+        return $result;
     }
 
     /**
@@ -56,8 +86,8 @@ class DependencyInjection
     protected static function getContainer(
         string $interfaceName,
         array $args = [],
-        \string $type = 'local',
-        \bool $allowCached = true,
+        string $type = 'local',
+        bool $allowCached = true,
         string $factoryMethodName = null
     )
     {
@@ -105,7 +135,7 @@ class DependencyInjection
     public static function getLocalContainer(
         string $interfaceName,
         array $args = [],
-        \bool $allowCached = true,
+        bool $allowCached = true,
         string $factoryMethodName = null
     )
     {
@@ -127,45 +157,4 @@ class DependencyInjection
     {
         return static::getContainer($interfaceName, [], 'static', false);
     }
-}
-
-/**
- * @param string $interfaceName
- * @param array $args
- * @param bool $allowCached
- * @param string|null $factoryMethodName
- *
- * @return object
- *
- * @throws ContainerTypeNotSupportingException
- * @throws DependencyInjectionException
- * @throws Exceptions\ParameterMustBeInterfaceNameOrClassNameException
- * @throws Exceptions\ReturnTypeMustImplementsInterfaceException
- * @throws \ReflectionException
- */
-function get_container(
-    string $interfaceName,
-    array $args = [],
-    \bool $allowCached = true,
-    string $factoryMethodName = null
-)
-{
-    return DependencyInjection::getLocalContainer($interfaceName, $args, $allowCached, $factoryMethodName);
-
-}
-
-/**
- * @param string $interfaceName
- *
- * @return string
- *
- * @throws ContainerTypeNotSupportingException
- * @throws DependencyInjectionException
- * @throws Exceptions\ParameterMustBeInterfaceNameOrClassNameException
- * @throws Exceptions\ReturnTypeMustImplementsInterfaceException
- * @throws \ReflectionException
- */
-function get_static_container(string $interfaceName) : ?string
-{
-    return DependencyInjection::getStaticContainer($interfaceName);
 }

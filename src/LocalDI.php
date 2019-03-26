@@ -24,7 +24,7 @@ class LocalDI
     /**
      * @var array
      */
-    protected static $instances = [];
+    protected static $containers = [];
 
     /**
      * @var string
@@ -52,6 +52,22 @@ class LocalDI
     protected $container;
 
     /**
+     * @param array $containers
+     */
+    public static function init(array $containers) : void
+    {
+        static::$containers = $containers;
+    }
+
+    /**
+     * @param array $containers
+     */
+    public static function addContainers(array $containers) : void
+    {
+        static::$containers = array_merge(static::$containers, $containers);
+    }
+
+    /**
      * LocalDI constructor.
      *
      * @param string $interfaceName
@@ -64,7 +80,7 @@ class LocalDI
     public function __construct(
         string $interfaceName,
         array $args = [],
-        \bool $isStatic = false,
+        bool $isStatic = false,
         string $factoryMethodName = null
     )
     {
@@ -74,7 +90,7 @@ class LocalDI
         $this->factoryMethodName = $factoryMethodName;
 
         $this->checkInterface();
-        $this->container = DependencyInjection::getContainers()[$interfaceName] ?? null;
+        $this->container = static::$containers[$interfaceName] ?? null;
     }
 
     /**
