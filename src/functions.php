@@ -11,7 +11,7 @@ use Scaleplan\DependencyInjection\Exceptions\DependencyInjectionException;
  * @param bool $allowCached
  * @param string|null $factoryMethodName
  *
- * @return object
+ * @return mixed
  *
  * @throws ContainerTypeNotSupportingException
  * @throws DependencyInjectionException
@@ -27,7 +27,6 @@ function get_container(
 )
 {
     return DependencyInjection::getLocalContainer($interfaceName, $args, $allowCached, $factoryMethodName);
-
 }
 
 /**

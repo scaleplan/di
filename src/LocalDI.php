@@ -68,6 +68,14 @@ class LocalDI
     }
 
     /**
+     * @return array
+     */
+    public static function getContainers() : array
+    {
+        return static::$containers;
+    }
+
+    /**
      * LocalDI constructor.
      *
      * @param string $interfaceName
@@ -98,7 +106,7 @@ class LocalDI
      */
     protected function checkInterface() : void
     {
-        if (!interface_exists($this->interfaceName) || !class_exists($this->interfaceName)) {
+        if (!interface_exists($this->interfaceName) && !class_exists($this->interfaceName)) {
             throw new ParameterMustBeInterfaceNameOrClassNameException(
                 "Parameter {$this->interfaceName} must be interface name or class name"
             );
@@ -120,7 +128,7 @@ class LocalDI
         }
 
         $object = $refCallable->invokeArgs($this->args);
-        if (!is_subclass_of($object, $this->interfaceName)) {
+        if (!\is_subclass_of($object, $this->interfaceName) && !\is_a($object, $this->interfaceName)) {
             throw new ReturnTypeMustImplementsInterfaceException();
         }
 
@@ -135,8 +143,12 @@ class LocalDI
      */
     protected function getContainerByClassName()
     {
-        [$containerClassName, $containerFactoryMethodName] = explode('::', $this->container);
-        if (!class_exists($containerClassName) || !is_subclass_of($containerClassName, $this->interfaceName)) {
+        $containerData = explode('::', $this->container);
+        $containerClassName = $containerData[0] ?? null;
+        $containerFactoryMethodName = $containerData[1] ?? null;
+        if (!class_exists($containerClassName)
+            || (!is_subclass_of($containerClassName, $this->interfaceName)
+                && !\is_a($containerClassName, $this->interfaceName))) {
             throw new ContainerNotImplementsException();
         }
 

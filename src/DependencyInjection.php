@@ -44,6 +44,14 @@ class DependencyInjection
     }
 
     /**
+     * @return array
+     */
+    public static function getContainers() : array
+    {
+        return LocalDI::getContainers();
+    }
+
+    /**
      * Найти все файлы в каталоге, включая вложенные директории
      *
      * @param string $dirPath - путь к каталогу
@@ -52,18 +60,26 @@ class DependencyInjection
      */
     protected static function getRecursivePaths(string $dirPath) : array
     {
-        $dir = rtrim($dirPath, '/\ ');
-        $paths = scandir($dir, SCANDIR_SORT_NONE);
+        if (!\is_dir($dirPath)) {
+            return [];
+        }
+
+        $dirPath = rtrim($dirPath, '/\ ');
+        $paths = \scandir($dirPath, SCANDIR_SORT_NONE);
         unset($paths[0], $paths[1]);
         $result = [];
 
-        foreach ($paths as &$path) {
-            $result += array_map(function ($item) use ($path, $dir) {
-                return "$dir/$path/$item";
-            }, static::getRecursivePaths("$dir/$path"));
-        }
+        foreach ($paths as $path) {
+            $path = "$dirPath/$path";
+            if (!\is_dir($path)) {
+                $result[] = $path;
+                continue;
+            }
 
-        unset($path);
+            $result += array_map(function ($item) use ($path) {
+                return "$path/$item";
+            }, static::getRecursivePaths($path));
+        }
 
         return $result;
     }
@@ -92,7 +108,7 @@ class DependencyInjection
     )
     {
         $cacheKey = "$interfaceName::$factoryMethodName:" . serialize($args);
-        if ($allowCached && empty(static::$cache[$cacheKey])) {
+        if ($allowCached && !empty(static::$cache[$cacheKey])) {
             return static::$cache[$cacheKey];
         }
 
