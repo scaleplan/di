@@ -11,7 +11,7 @@ use Scaleplan\DependencyInjection\Exceptions\DependencyInjectionException;
  * @param bool $allowCached
  * @param string|null $factoryMethodName
  *
- * @return object|null
+ * @return mixed
  *
  * @throws ContainerTypeNotSupportingException
  * @throws DependencyInjectionException
@@ -24,7 +24,7 @@ function get_container(
     array $args = [],
     bool $allowCached = true,
     string $factoryMethodName = null
-) : ?object
+)
 {
     return DependencyInjection::getLocalContainer($interfaceName, $args, $allowCached, $factoryMethodName);
 }
@@ -68,8 +68,8 @@ function get_required_static_container(string $interfaceName) : string
  * @param bool $allowCached
  * @param string|null $factoryMethodName
  *
- * @return object
- * 
+ * @return mixed
+ *
  * @throws ContainerTypeNotSupportingException
  * @throws DependencyInjectionException
  * @throws Exceptions\ParameterMustBeInterfaceNameOrClassNameException
@@ -81,7 +81,7 @@ function get_required_container(
     array $args = [],
     bool $allowCached = true,
     string $factoryMethodName = null
-) : object
+)
 {
     return DependencyInjection::getRequiredLocalContainer($interfaceName, $args, $allowCached, $factoryMethodName);
 }
