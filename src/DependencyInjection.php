@@ -2,8 +2,11 @@
 
 namespace Scaleplan\DependencyInjection;
 
+use Scaleplan\DependencyInjection\Exceptions\ContainerNotFoundException;
 use Scaleplan\DependencyInjection\Exceptions\ContainerTypeNotSupportingException;
 use Scaleplan\DependencyInjection\Exceptions\DependencyInjectionException;
+use Scaleplan\DependencyInjection\Exceptions\ParameterMustBeInterfaceNameOrClassNameException;
+use Scaleplan\DependencyInjection\Exceptions\ReturnTypeMustImplementsInterfaceException;
 
 /**
  * Class DependencyInjection
@@ -140,7 +143,7 @@ class DependencyInjection
      * @param bool $allowCached
      * @param string|null $factoryMethodName
      *
-     * @return object
+     * @return object|null
      *
      * @throws ContainerTypeNotSupportingException
      * @throws DependencyInjectionException
@@ -153,7 +156,7 @@ class DependencyInjection
         array $args = [],
         bool $allowCached = true,
         string $factoryMethodName = null
-    )
+    ) : ?object
     {
         return static::getContainer($interfaceName, $args, 'local', $allowCached, $factoryMethodName);
     }
@@ -172,5 +175,54 @@ class DependencyInjection
     public static function getStaticContainer(string $interfaceName) : ?string
     {
         return static::getContainer($interfaceName, [], 'static', false);
+    }
+
+    /**
+     * @param string $interfaceName
+     *
+     * @return string
+     *
+     * @throws ContainerNotFoundException
+     * @throws ContainerTypeNotSupportingException
+     * @throws DependencyInjectionException
+     * @throws Exceptions\ParameterMustBeInterfaceNameOrClassNameException
+     * @throws Exceptions\ReturnTypeMustImplementsInterfaceException
+     * @throws \ReflectionException
+     */
+    public static function getRequiredStaticContainer(string $interfaceName) : string
+    {
+        if (null === ($container = static::getStaticContainer($interfaceName))) {
+            throw new ContainerNotFoundException();
+        }
+
+        return $container;
+    }
+
+    /**
+     * @param string $interfaceName
+     * @param array $args
+     * @param bool $allowCached
+     * @param string|null $factoryMethodName
+     *
+     * @return object
+     *
+     * @throws ContainerTypeNotSupportingException
+     * @throws DependencyInjectionException
+     * @throws Exceptions\ParameterMustBeInterfaceNameOrClassNameException
+     * @throws Exceptions\ReturnTypeMustImplementsInterfaceException
+     * @throws \ReflectionException
+     */
+    public static function getRequiredLocalContainer(
+        string $interfaceName,
+        array $args = [],
+        bool $allowCached = true,
+        string $factoryMethodName = null
+    ) : object
+    {
+        if (null ===($container = static::getLocalContainer($interfaceName, $args, $allowCached, $factoryMethodName))) {
+            throw new ContainerNotFoundException();
+        }
+
+        return $container;
     }
 }

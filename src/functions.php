@@ -11,7 +11,7 @@ use Scaleplan\DependencyInjection\Exceptions\DependencyInjectionException;
  * @param bool $allowCached
  * @param string|null $factoryMethodName
  *
- * @return mixed
+ * @return object|null
  *
  * @throws ContainerTypeNotSupportingException
  * @throws DependencyInjectionException
@@ -24,7 +24,7 @@ function get_container(
     array $args = [],
     bool $allowCached = true,
     string $factoryMethodName = null
-)
+) : ?object
 {
     return DependencyInjection::getLocalContainer($interfaceName, $args, $allowCached, $factoryMethodName);
 }
@@ -43,4 +43,45 @@ function get_container(
 function get_static_container(string $interfaceName) : ?string
 {
     return DependencyInjection::getStaticContainer($interfaceName);
+}
+
+/**
+ * @param string $interfaceName
+ *
+ * @return string
+ *
+ * @throws ContainerTypeNotSupportingException
+ * @throws DependencyInjectionException
+ * @throws Exceptions\ContainerNotFoundException
+ * @throws Exceptions\ParameterMustBeInterfaceNameOrClassNameException
+ * @throws Exceptions\ReturnTypeMustImplementsInterfaceException
+ * @throws \ReflectionException
+ */
+function get_required_static_container(string $interfaceName) : string
+{
+    return DependencyInjection::getRequiredStaticContainer($interfaceName);
+}
+
+/**
+ * @param string $interfaceName
+ * @param array $args
+ * @param bool $allowCached
+ * @param string|null $factoryMethodName
+ *
+ * @return object
+ * 
+ * @throws ContainerTypeNotSupportingException
+ * @throws DependencyInjectionException
+ * @throws Exceptions\ParameterMustBeInterfaceNameOrClassNameException
+ * @throws Exceptions\ReturnTypeMustImplementsInterfaceException
+ * @throws \ReflectionException
+ */
+function get_required_container(
+    string $interfaceName,
+    array $args = [],
+    bool $allowCached = true,
+    string $factoryMethodName = null
+) : object
+{
+    return DependencyInjection::getRequiredLocalContainer($interfaceName, $args, $allowCached, $factoryMethodName);
 }
