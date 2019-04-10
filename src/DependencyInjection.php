@@ -110,7 +110,13 @@ class DependencyInjection
         string $factoryMethodName = null
     )
     {
-        $cacheKey = "$interfaceName::$factoryMethodName:" . serialize($args);
+        $cacheKey = null;
+        try {
+            $cacheKey = "$interfaceName::$factoryMethodName:" . serialize($args);
+        } catch (\Throwable $e) {
+            $allowCached = false;
+        }
+
         if ($allowCached && !empty(static::$cache[$cacheKey])) {
             return static::$cache[$cacheKey];
         }
