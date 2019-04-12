@@ -79,7 +79,7 @@ class DependencyInjection
                 continue;
             }
 
-            $result += array_map(function ($item) use ($path) {
+            $result += array_map(static function ($item) use ($path) {
                 return "$path/$item";
             }, static::getRecursivePaths($path));
         }
