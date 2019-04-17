@@ -5,8 +5,7 @@ namespace Scaleplan\DependencyInjection;
 use Scaleplan\DependencyInjection\Exceptions\ContainerNotFoundException;
 use Scaleplan\DependencyInjection\Exceptions\ContainerTypeNotSupportingException;
 use Scaleplan\DependencyInjection\Exceptions\DependencyInjectionException;
-use Scaleplan\DependencyInjection\Exceptions\ParameterMustBeInterfaceNameOrClassNameException;
-use Scaleplan\DependencyInjection\Exceptions\ReturnTypeMustImplementsInterfaceException;
+use Scaleplan\Helpers\FileHelper;
 
 /**
  * Class DependencyInjection
@@ -41,7 +40,7 @@ class DependencyInjection
      */
     public static function loadContainersFromDir(string $dirPath) : void
     {
-        foreach (static::getRecursivePaths($dirPath) as $file) {
+        foreach (FileHelper::getRecursivePaths($dirPath) as $file) {
             LocalDI::addContainers(include $file);
         }
     }
@@ -52,39 +51,6 @@ class DependencyInjection
     public static function getContainers() : array
     {
         return LocalDI::getContainers();
-    }
-
-    /**
-     * Найти все файлы в каталоге, включая вложенные директории
-     *
-     * @param string $dirPath - путь к каталогу
-     *
-     * @return array
-     */
-    protected static function getRecursivePaths(string $dirPath) : array
-    {
-        if (!\is_dir($dirPath)) {
-            return [];
-        }
-
-        $dirPath = rtrim($dirPath, '/\ ');
-        $paths = \scandir($dirPath, SCANDIR_SORT_NONE);
-        unset($paths[0], $paths[1]);
-        $result = [];
-
-        foreach ($paths as $path) {
-            $path = "$dirPath/$path";
-            if (!\is_dir($path)) {
-                $result[] = $path;
-                continue;
-            }
-
-            $result += array_map(static function ($item) use ($path) {
-                return "$path/$item";
-            }, static::getRecursivePaths($path));
-        }
-
-        return $result;
     }
 
     /**
