@@ -10,4 +10,5 @@ namespace Scaleplan\DependencyInjection\Exceptions;
 class ContainerNotImplementsException extends DependencyInjectionException
 {
     public const MESSAGE = 'Container not implements passed interface.';
+    public const CODE = 406;
 }

@@ -10,4 +10,5 @@ namespace Scaleplan\DependencyInjection\Exceptions;
 class FactoryMethodNotFoundException extends DependencyInjectionException
 {
     public const MESSAGE = 'Factory method not found.';
+    public const CODE = 404;
 }
