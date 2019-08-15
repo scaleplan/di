@@ -2,6 +2,7 @@
 
 namespace Scaleplan\DependencyInjection;
 
+use Psr\Container\ContainerInterface;
 use Scaleplan\DependencyInjection\Exceptions\ContainerNotFoundException;
 use Scaleplan\DependencyInjection\Exceptions\ContainerTypeNotSupportingException;
 use Scaleplan\DependencyInjection\Exceptions\DependencyInjectionException;
@@ -12,7 +13,7 @@ use Scaleplan\Helpers\FileHelper;
  *
  * @package Scaleplan\DependencyInjection
  */
-class DependencyInjection
+class DependencyInjection implements ContainerInterface
 {
     /**
      * @var array
@@ -196,5 +197,36 @@ class DependencyInjection
         }
 
         return $container;
+    }
+
+    /**
+     * @param string $interfaceName
+     *
+     * @return mixed|object
+     * @throws ContainerTypeNotSupportingException
+     * @throws DependencyInjectionException
+     * @throws Exceptions\ParameterMustBeInterfaceNameOrClassNameException
+     * @throws Exceptions\ReturnTypeMustImplementsInterfaceException
+     * @throws \ReflectionException
+     */
+    public function get($interfaceName)
+    {
+        return static::getRequiredLocalContainer($interfaceName);
+    }
+
+    /**
+     * @param string $interfaceName
+     *
+     * @return bool
+     *
+     * @throws ContainerTypeNotSupportingException
+     * @throws DependencyInjectionException
+     * @throws Exceptions\ParameterMustBeInterfaceNameOrClassNameException
+     * @throws Exceptions\ReturnTypeMustImplementsInterfaceException
+     * @throws \ReflectionException
+     */
+    public function has($interfaceName) : bool
+    {
+        return null !== static::getLocalContainer($interfaceName);
     }
 }

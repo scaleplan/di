@@ -11,6 +11,7 @@
     },
     "require": {
         "php": ">=7.0",
-        "scaleplan/http": "dev-master"
+        "scaleplan/http": "dev-master",
+        "psr/container": "^1.0"
     }
 }
