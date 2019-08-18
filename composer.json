@@ -14,4 +14,8 @@
         "scaleplan/http": "dev-master",
         "psr/container": "^1.0"
     }
+    ,
+    "require-dev": {
+        "roave/security-advisories": "dev-master"
+    }
 }
