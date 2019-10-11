@@ -55,6 +55,28 @@ class DependencyInjection implements ContainerInterface
     }
 
     /**
+     * @param $interfaceName
+     * @param array $args
+     * @param null $factoryMethodName
+     *
+     * @return string
+     */
+    public static function getCacheKey($interfaceName, $args = [], $factoryMethodName = null) : string
+    {
+        return "$interfaceName::$factoryMethodName:" . serialize($args);
+    }
+
+    /**
+     * @param $interfaceName
+     * @param array $args
+     * @param null $factoryMethodName
+     */
+    public static function removeFromCache($interfaceName, $args = [], $factoryMethodName = null) : void
+    {
+        unset(static::$cache[static::getCacheKey($interfaceName, $args, $factoryMethodName)]);
+    }
+
+    /**
      * @param string $interfaceName
      * @param array $args
      * @param string $type
@@ -79,7 +101,7 @@ class DependencyInjection implements ContainerInterface
     {
         $cacheKey = null;
         try {
-            $cacheKey = "$interfaceName::$factoryMethodName:" . serialize($args);
+            $cacheKey = static::getCacheKey($interfaceName, $args, $factoryMethodName);
         } catch (\Throwable $e) {
             $allowCached = false;
         }
