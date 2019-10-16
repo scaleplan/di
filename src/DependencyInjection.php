@@ -187,7 +187,7 @@ class DependencyInjection implements ContainerInterface
     public static function getRequiredStaticContainer(string $interfaceName) : string
     {
         if (null === ($container = static::getStaticContainer($interfaceName))) {
-            throw new ContainerNotFoundException();
+            throw new ContainerNotFoundException("Container for $interfaceName not found");
         }
 
         return $container;
@@ -215,7 +215,7 @@ class DependencyInjection implements ContainerInterface
     ) : object
     {
         if (null ===($container = static::getLocalContainer($interfaceName, $args, $allowCached, $factoryMethodName))) {
-            throw new ContainerNotFoundException();
+            throw new ContainerNotFoundException("Container for $interfaceName not found");
         }
 
         return $container;
