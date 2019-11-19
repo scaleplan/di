@@ -121,6 +121,10 @@ class LocalDI
      */
     protected function getContainerFromCallable()
     {
+        if (!is_callable($this->container)) {
+            return null;
+        }
+
         $refCallable = new \ReflectionFunction($this->container);
         $returnType = $refCallable->getReturnType();
         if ($returnType && ($returnType->allowsNull() || $returnType->isBuiltin())) {
@@ -170,6 +174,24 @@ class LocalDI
     }
 
     /**
+     * @return object|null
+     *
+     * @throws ContainerNotImplementsException
+     */
+    protected function getContainerFromObject()
+    {
+        if (!is_object($this->container)) {
+            return null;
+        }
+
+        if (!is_subclass_of($this->container, $this->interfaceName) && !\is_a($this->container, $this->interfaceName)) {
+            throw new ContainerNotImplementsException();
+        }
+
+        return $this->container;
+    }
+
+    /**
      * @return object|string
      *
      * @throws DependencyInjectionException
@@ -182,11 +204,7 @@ class LocalDI
             return null;
         }
 
-        if (is_callable($this->container)) {
-            return $this->getContainerFromCallable();
-        }
-
-        return $this->getContainerByClassName();
+        return $this->getContainerFromObject() ?? $this->getContainerFromCallable() ?? $this->getContainerByClassName();
     }
 
     /**
