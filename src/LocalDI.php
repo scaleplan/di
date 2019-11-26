@@ -180,7 +180,7 @@ class LocalDI
      */
     protected function getContainerFromObject()
     {
-        if (!is_object($this->container)) {
+        if (!is_object($this->container) || is_callable($this->container)) {
             return null;
         }
 
