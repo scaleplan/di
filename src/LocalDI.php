@@ -153,7 +153,7 @@ class LocalDI
         if (!class_exists($containerClassName)
             || (!is_subclass_of($containerClassName, $this->interfaceName)
                 && !\is_a($containerClassName, $this->interfaceName))) {
-            throw new ContainerNotImplementsException();
+            throw new ContainerNotImplementsException($containerClassName, $this->interfaceName);
         }
 
         if ($this->isStatic) {
@@ -185,7 +185,7 @@ class LocalDI
         }
 
         if (!is_subclass_of($this->container, $this->interfaceName) && !\is_a($this->container, $this->interfaceName)) {
-            throw new ContainerNotImplementsException();
+            throw new ContainerNotImplementsException($this->container, $this->interfaceName);
         }
 
         return $this->container;
