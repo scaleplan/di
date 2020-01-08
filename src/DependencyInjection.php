@@ -41,7 +41,7 @@ class DependencyInjection implements ContainerInterface
      */
     public static function loadContainersFromDir(string $dirPath) : void
     {
-        foreach (FileHelper::getRecursivePaths($dirPath) as $file) {
+        foreach (FileHelper::getRecursivePaths($dirPath, ['php']) as $file) {
             LocalDI::addContainers(include $file);
         }
     }
