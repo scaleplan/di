@@ -110,7 +110,6 @@ class DependencyInjection implements ContainerInterface
         }
 
         static::addContainers([$interfaceName => $container,]);
-        static::removeFromCache($interfaceName);
     }
 
     /**
