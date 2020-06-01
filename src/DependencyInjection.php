@@ -1,11 +1,14 @@
 <?php
+declare(strict_types=1);
 
 namespace Scaleplan\DependencyInjection;
 
 use Psr\Container\ContainerInterface;
 use Scaleplan\DependencyInjection\Exceptions\ContainerNotFoundException;
+use Scaleplan\DependencyInjection\Exceptions\ContainerNotImplementsException;
 use Scaleplan\DependencyInjection\Exceptions\ContainerTypeNotSupportingException;
 use Scaleplan\DependencyInjection\Exceptions\DependencyInjectionException;
+use Scaleplan\DependencyInjection\Exceptions\ParameterMustBeInterfaceNameOrClassNameException;
 use Scaleplan\Helpers\FileHelper;
 
 /**
@@ -34,6 +37,9 @@ class DependencyInjection implements ContainerInterface
     public static function addContainers(array $containers) : void
     {
         LocalDI::addContainers($containers);
+        foreach ($containers as $interfaceName => $className) {
+            static::removeFromCache($interfaceName);
+        }
     }
 
     /**
@@ -55,25 +61,56 @@ class DependencyInjection implements ContainerInterface
     }
 
     /**
-     * @param $interfaceName
+     * @param string $interfaceName
      * @param array $args
-     * @param null $factoryMethodName
+     * @param string $factoryMethodName
      *
      * @return string
      */
-    public static function getCacheKey($interfaceName, $args = [], $factoryMethodName = null) : string
+    public static function getCacheKey(
+        string $interfaceName,
+        array $args = [],
+        string $factoryMethodName = null
+    ) : string
     {
         return "$interfaceName::$factoryMethodName:" . serialize($args);
     }
 
     /**
-     * @param $interfaceName
+     * @param string $interfaceName
      * @param array $args
-     * @param null $factoryMethodName
+     * @param string $factoryMethodName
      */
-    public static function removeFromCache($interfaceName, $args = [], $factoryMethodName = null) : void
+    public static function removeFromCache(
+        string $interfaceName,
+        array $args = [],
+        string $factoryMethodName = null
+    ) : void
     {
         unset(static::$cache[static::getCacheKey($interfaceName, $args, $factoryMethodName)]);
+    }
+
+    /**
+     * @param string $interfaceName
+     * @param $container
+     *
+     * @throws ParameterMustBeInterfaceNameOrClassNameException
+     * @throws ContainerNotImplementsException
+     */
+    public static function addContainer(string $interfaceName, $container) : void
+    {
+        if (!interface_exists($interfaceName) && !class_exists($interfaceName)) {
+            throw new ParameterMustBeInterfaceNameOrClassNameException(
+                "Parameter $interfaceName must be interface name or class name"
+            );
+        }
+
+        if (!($container instanceof $interfaceName) && !is_subclass_of($container, $interfaceName)) {
+            throw new ContainerNotImplementsException($container, $interfaceName);
+        }
+
+        static::addContainers([$interfaceName => $container,]);
+        static::removeFromCache($interfaceName);
     }
 
     /**
@@ -214,7 +251,7 @@ class DependencyInjection implements ContainerInterface
         string $factoryMethodName = null
     ) : object
     {
-        if (null ===($container = static::getLocalContainer($interfaceName, $args, $allowCached, $factoryMethodName))) {
+        if (null === ($container = static::getLocalContainer($interfaceName, $args, $allowCached, $factoryMethodName))) {
             throw new ContainerNotFoundException("Container for $interfaceName not found");
         }
 
@@ -225,6 +262,7 @@ class DependencyInjection implements ContainerInterface
      * @param string $interfaceName
      *
      * @return mixed|object
+     *
      * @throws ContainerTypeNotSupportingException
      * @throws DependencyInjectionException
      * @throws Exceptions\ParameterMustBeInterfaceNameOrClassNameException
