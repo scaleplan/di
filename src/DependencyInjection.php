@@ -161,7 +161,7 @@ class DependencyInjection implements ContainerInterface
                 throw new ContainerTypeNotSupportingException();
         }
 
-        if ($container && empty(static::$cache[$cacheKey])) {
+        if ($container && $allowCached && empty(static::$cache[$cacheKey])) {
             static::$cache[$cacheKey] = $container;
         }
 
