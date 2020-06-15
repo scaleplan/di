@@ -9,7 +9,7 @@ namespace Scaleplan\DependencyInjection\Exceptions;
  */
 class DependencyInjectionException extends \Exception
 {
-    public const MESSAGE = 'Container error.';
+    public const MESSAGE = 'Ошибка контейнера.';
     public const CODE = 400;
 
     /**

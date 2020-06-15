@@ -9,6 +9,6 @@ namespace Scaleplan\DependencyInjection\Exceptions;
  */
 class FactoryMethodNotAllowedException extends DependencyInjectionException
 {
-    public const MESSAGE = 'Factory method not allowed.';
+    public const MESSAGE = 'Фабричный метод не ожидается здесь.';
     public const CODE = 403;
 }

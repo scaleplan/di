@@ -9,7 +9,7 @@ namespace Scaleplan\DependencyInjection\Exceptions;
  */
 class ContainerNotImplementsException extends DependencyInjectionException
 {
-    public const MESSAGE = 'Container ":container" not implements ":interface".';
+    public const MESSAGE = 'Контейнер ":container" не реализует и не наследуется от ":interface".';
     public const CODE = 406;
 
     /**

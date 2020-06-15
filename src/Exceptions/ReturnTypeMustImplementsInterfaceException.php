@@ -9,6 +9,6 @@ namespace Scaleplan\DependencyInjection\Exceptions;
  */
 class ReturnTypeMustImplementsInterfaceException extends DependencyInjectionException
 {
-    public const MESSAGE = 'Return type of callable must implements requested interface.';
+    public const MESSAGE = 'Возвращаемое значение должно соответвовать запрашиваемому интерфейсу или классу.';
     public const CODE = 406;
 }

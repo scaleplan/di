@@ -109,7 +109,7 @@ class LocalDI
     {
         if (!interface_exists($this->interfaceName) && !class_exists($this->interfaceName)) {
             throw new ParameterMustBeInterfaceNameOrClassNameException(
-                "Parameter {$this->interfaceName} must be interface name or class name"
+                "Параметр {$this->interfaceName} должен быть именем интерфейса или именем класса."
             );
         }
     }
@@ -226,7 +226,7 @@ class LocalDI
     {
         if (!$refClass->hasMethod($factoryMethodName)) {
             throw new FactoryMethodNotFoundException(
-                'Class without public constructor must have a factory method ' . static::FACTORY_METHOD_NAME
+                'Класс без публичного конструктора должен иметь фабричный метод ' . static::FACTORY_METHOD_NAME
             );
         }
 
@@ -238,7 +238,7 @@ class LocalDI
         if (!$method->getReturnType()
             || !(($object = $method->invokeArgs(null, $this->args)) instanceof $this->interfaceName)) {
             throw new FactoryMethodInvalidException(
-                "The object returned by the factory method must implement the interface {$this->interfaceName}."
+                "Объект, возвращаемый фабричным методом должен реализовывать интерфейс {$this->interfaceName}."
             );
         }
 

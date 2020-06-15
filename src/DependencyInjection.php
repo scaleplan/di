@@ -101,7 +101,7 @@ class DependencyInjection implements ContainerInterface
     {
         if (!interface_exists($interfaceName) && !class_exists($interfaceName)) {
             throw new ParameterMustBeInterfaceNameOrClassNameException(
-                "Parameter $interfaceName must be interface name or class name"
+                "Параметр $interfaceName должен быть именем интерфейса или именем класса."
             );
         }
 
@@ -223,7 +223,7 @@ class DependencyInjection implements ContainerInterface
     public static function getRequiredStaticContainer(string $interfaceName) : string
     {
         if (null === ($container = static::getStaticContainer($interfaceName))) {
-            throw new ContainerNotFoundException("Container for $interfaceName not found");
+            throw new ContainerNotFoundException("Контейнер для $interfaceName не найден.");
         }
 
         return $container;
@@ -251,7 +251,7 @@ class DependencyInjection implements ContainerInterface
     ) : object
     {
         if (null === ($container = static::getLocalContainer($interfaceName, $args, $allowCached, $factoryMethodName))) {
-            throw new ContainerNotFoundException("Container for $interfaceName not found");
+            throw new ContainerNotFoundException("Контейнер для $interfaceName не найден.");
         }
 
         return $container;
