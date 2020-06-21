@@ -9,6 +9,6 @@ namespace Scaleplan\DependencyInjection\Exceptions;
  */
 class FactoryMethodInvalidException extends DependencyInjectionException
 {
-    public const MESSAGE = 'Неверный фабричный метод.';
+    public const MESSAGE = 'di.wrong-fabric-method';
     public const CODE = 406;
 }

@@ -9,6 +9,6 @@ namespace Scaleplan\DependencyInjection\Exceptions;
  */
 class ContainerNotFoundException extends DependencyInjectionException
 {
-    public const MESSAGE = 'Контейнер не найден.';
+    public const MESSAGE = 'di.container-not-found';
     public const CODE = 404;
 }

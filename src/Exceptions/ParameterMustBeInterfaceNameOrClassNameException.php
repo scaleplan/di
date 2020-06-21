@@ -9,6 +9,6 @@ namespace Scaleplan\DependencyInjection\Exceptions;
  */
 class ParameterMustBeInterfaceNameOrClassNameException extends DependencyInjectionException
 {
-    public const MESSAGE = 'Первый параметр должен быть именем интерфейса или именем класса.';
+    public const MESSAGE = 'di.first-parameter-error';
     public const CODE = 406;
 }

@@ -1,0 +1,14 @@
+interface-parameter-error: Параметр :interface-name должен быть именем интерфейса или именем класса.
+container-for-not-found: Контейнер для :interface-name не найден.
+fabric-result-not-implements: Объект, возвращаемый фабричным методом должен реализовывать интерфейс :interface-name.
+method-not-found: Метод :method-name не найден.
+container-not-found: Контейнер не найден.
+container-not-implements: Контейнер ":container" не реализует и не наследуется от ":interface".
+container-type-not-supported: Такой тип контейнера не поддерживается.
+container-error: Ошибка контейнера.
+wrong-fabric-method: Неверный фабричный метод.
+unexpected-fabric-method: Фабричный метод не ожидается здесь.
+fabric-method-not-found: Фабричный метод не найден.
+first-parameter-error: Первый параметр должен быть именем интерфейса или именем класса.
+return-not-implements: Возвращаемое значение должно соответвовать запрашиваемому интерфейсу или классу.
+fabric-method-must-be: Класс без публичного конструктора должен иметь фабричный метод :factory-method-name.

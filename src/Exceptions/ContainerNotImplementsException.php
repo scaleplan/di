@@ -2,6 +2,8 @@
 
 namespace Scaleplan\DependencyInjection\Exceptions;
 
+use function Scaleplan\Translator\translate;
+
 /**
  * Class ContainerNotImplementsException
  *
@@ -9,8 +11,8 @@ namespace Scaleplan\DependencyInjection\Exceptions;
  */
 class ContainerNotImplementsException extends DependencyInjectionException
 {
-    public const MESSAGE = 'Контейнер ":container" не реализует и не наследуется от ":interface".';
-    public const CODE = 406;
+    public const MESSAGE = 'di.container-not-implements';
+    public const CODE    = 406;
 
     /**
      * ContainerNotImplementsException constructor.
@@ -20,11 +22,18 @@ class ContainerNotImplementsException extends DependencyInjectionException
      * @param string $message
      * @param int $code
      * @param \Throwable|null $previous
+     *
+     * @throws ContainerTypeNotSupportingException
+     * @throws DependencyInjectionException
+     * @throws ParameterMustBeInterfaceNameOrClassNameException
+     * @throws ReturnTypeMustImplementsInterfaceException
+     * @throws \ReflectionException
      */
     public function __construct($container, $interface, string $message = '', int $code = 0, \Throwable $previous = null)
     {
         parent::__construct(
-            strtr($message ?: static::MESSAGE, [':container' => $container, ':interface' => $interface]),
+            translate(static::MESSAGE, [':container' => $container, ':interface' => $interface]) ?:
+                strtr($message ?: static::MESSAGE, [':container' => $container, ':interface' => $interface]),
             $code,
             $previous
         );

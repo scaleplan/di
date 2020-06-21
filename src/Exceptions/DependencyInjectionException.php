@@ -2,6 +2,8 @@
 
 namespace Scaleplan\DependencyInjection\Exceptions;
 
+use function Scaleplan\Translator\translate;
+
 /**
  * Class DependencyInjectionException
  *
@@ -9,7 +11,7 @@ namespace Scaleplan\DependencyInjection\Exceptions;
  */
 class DependencyInjectionException extends \Exception
 {
-    public const MESSAGE = 'Ошибка контейнера.';
+    public const MESSAGE = 'di.container-error';
     public const CODE = 400;
 
     /**
@@ -18,9 +20,19 @@ class DependencyInjectionException extends \Exception
      * @param string $message
      * @param int $code
      * @param \Throwable|null $previous
+     *
+     * @throws ContainerTypeNotSupportingException
+     * @throws DependencyInjectionException
+     * @throws ParameterMustBeInterfaceNameOrClassNameException
+     * @throws ReturnTypeMustImplementsInterfaceException
+     * @throws \ReflectionException
      */
     public function __construct(string $message = '', int $code = 0, \Throwable $previous = null)
     {
-        parent::__construct($message ?: static::MESSAGE, $code ?: static::CODE, $previous);
+        parent::__construct(
+            $message ?: translate(static::MESSAGE) ?: static::MESSAGE,
+            $code ?: static::CODE,
+            $previous
+        );
     }
 }

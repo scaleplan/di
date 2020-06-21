@@ -9,6 +9,6 @@ namespace Scaleplan\DependencyInjection\Exceptions;
  */
 class FactoryMethodNotFoundException extends DependencyInjectionException
 {
-    public const MESSAGE = 'Фабричный метод не найден.';
+    public const MESSAGE = 'di.fabric-method-not-found';
     public const CODE = 404;
 }

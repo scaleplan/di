@@ -10,6 +10,7 @@ use Scaleplan\DependencyInjection\Exceptions\ContainerTypeNotSupportingException
 use Scaleplan\DependencyInjection\Exceptions\DependencyInjectionException;
 use Scaleplan\DependencyInjection\Exceptions\ParameterMustBeInterfaceNameOrClassNameException;
 use Scaleplan\Helpers\FileHelper;
+use function Scaleplan\Translator\translate;
 
 /**
  * Class DependencyInjection
@@ -94,14 +95,18 @@ class DependencyInjection implements ContainerInterface
      * @param string $interfaceName
      * @param $container
      *
-     * @throws ParameterMustBeInterfaceNameOrClassNameException
      * @throws ContainerNotImplementsException
+     * @throws ContainerTypeNotSupportingException
+     * @throws DependencyInjectionException
+     * @throws Exceptions\ReturnTypeMustImplementsInterfaceException
+     * @throws ParameterMustBeInterfaceNameOrClassNameException
+     * @throws \ReflectionException
      */
     public static function addContainer(string $interfaceName, $container) : void
     {
         if (!interface_exists($interfaceName) && !class_exists($interfaceName)) {
             throw new ParameterMustBeInterfaceNameOrClassNameException(
-                "Параметр $interfaceName должен быть именем интерфейса или именем класса."
+                translate('di.interface-parameter-error', ['interface-name' => $interfaceName,])
             );
         }
 
@@ -223,7 +228,9 @@ class DependencyInjection implements ContainerInterface
     public static function getRequiredStaticContainer(string $interfaceName) : string
     {
         if (null === ($container = static::getStaticContainer($interfaceName))) {
-            throw new ContainerNotFoundException("Контейнер для $interfaceName не найден.");
+            throw new ContainerNotFoundException(
+                translate('di.container-for-not-found', ['interface-name' => $interfaceName,])
+            );
         }
 
         return $container;
@@ -251,7 +258,9 @@ class DependencyInjection implements ContainerInterface
     ) : object
     {
         if (null === ($container = static::getLocalContainer($interfaceName, $args, $allowCached, $factoryMethodName))) {
-            throw new ContainerNotFoundException("Контейнер для $interfaceName не найден.");
+            throw new ContainerNotFoundException(
+                translate('di.container-for-not-found', ['interface-name' => $interfaceName,])
+            );
         }
 
         return $container;

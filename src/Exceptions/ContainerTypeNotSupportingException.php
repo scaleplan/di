@@ -9,6 +9,6 @@ namespace Scaleplan\DependencyInjection\Exceptions;
  */
 class ContainerTypeNotSupportingException extends DependencyInjectionException
 {
-    public const MESSAGE = 'Такой тип контейнера не поддерживается.';
+    public const MESSAGE = 'di.container-type-not-supported';
     public const CODE = 406;
 }

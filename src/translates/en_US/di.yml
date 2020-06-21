@@ -1,0 +1,14 @@
+interface-parameter-error: Parameter :interface-name must be interface name or class name.
+container-for-not-found: Container for :interface-name not found.
+fabric-result-not-implements: Fabric method must return object which implements :interface-name.
+method-not-found: Method :method-name not found.
+container-not-found: Container not found.
+container-not-implements: Container ":container" not implements ":interface" and not inherits ":interface".
+container-type-not-supported: This contaner type not supported.
+container-error: Container error.
+wrong-fabric-method: Wrong fabric method.
+unexpected-fabric-method: Unexpected fabric method.
+fabric-method-not-found: Fabric method not found.
+first-parameter-error: First parameter must be interface name or class name.
+return-not-implements: Return value must implements requested interface or inherists requested class.
+fabric-method-must-be: Class without public constructor must have fabric method :factory-method-name.

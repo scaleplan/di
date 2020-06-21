@@ -10,6 +10,7 @@ use Scaleplan\DependencyInjection\Exceptions\FactoryMethodNotAllowedException;
 use Scaleplan\DependencyInjection\Exceptions\FactoryMethodNotFoundException;
 use Scaleplan\DependencyInjection\Exceptions\ParameterMustBeInterfaceNameOrClassNameException;
 use Scaleplan\DependencyInjection\Exceptions\ReturnTypeMustImplementsInterfaceException;
+use function Scaleplan\Translator\translate;
 
 /**
  * Class LocalDI
@@ -84,7 +85,11 @@ class LocalDI
      * @param bool $isStatic
      * @param string|null $factoryMethodName
      *
+     * @throws DependencyInjectionException
+     * @throws Exceptions\ContainerTypeNotSupportingException
      * @throws ParameterMustBeInterfaceNameOrClassNameException
+     * @throws ReturnTypeMustImplementsInterfaceException
+     * @throws \ReflectionException
      */
     public function __construct(
         string $interfaceName,
@@ -103,13 +108,17 @@ class LocalDI
     }
 
     /**
+     * @throws DependencyInjectionException
+     * @throws Exceptions\ContainerTypeNotSupportingException
      * @throws ParameterMustBeInterfaceNameOrClassNameException
+     * @throws ReturnTypeMustImplementsInterfaceException
+     * @throws \ReflectionException
      */
     protected function checkInterface() : void
     {
         if (!interface_exists($this->interfaceName) && !class_exists($this->interfaceName)) {
             throw new ParameterMustBeInterfaceNameOrClassNameException(
-                "Параметр {$this->interfaceName} должен быть именем интерфейса или именем класса."
+                translate('di.interface-parameter-error', ['interface-name' => $this->interfaceName,])
             );
         }
     }
@@ -175,9 +184,14 @@ class LocalDI
     }
 
     /**
-     * @return object|null
+     * @return callable|mixed|string|null
      *
      * @throws ContainerNotImplementsException
+     * @throws DependencyInjectionException
+     * @throws Exceptions\ContainerTypeNotSupportingException
+     * @throws ParameterMustBeInterfaceNameOrClassNameException
+     * @throws ReturnTypeMustImplementsInterfaceException
+     * @throws \ReflectionException
      */
     protected function getContainerFromObject()
     {
@@ -214,9 +228,13 @@ class LocalDI
      *
      * @return mixed
      *
+     * @throws DependencyInjectionException
+     * @throws Exceptions\ContainerTypeNotSupportingException
      * @throws FactoryMethodInvalidException
      * @throws FactoryMethodNotAllowedException
      * @throws FactoryMethodNotFoundException
+     * @throws ParameterMustBeInterfaceNameOrClassNameException
+     * @throws ReturnTypeMustImplementsInterfaceException
      * @throws \ReflectionException
      */
     protected function getContainerByFactory(
@@ -226,7 +244,7 @@ class LocalDI
     {
         if (!$refClass->hasMethod($factoryMethodName)) {
             throw new FactoryMethodNotFoundException(
-                'Класс без публичного конструктора должен иметь фабричный метод ' . static::FACTORY_METHOD_NAME
+                translate('di.fabric-method-must-be', ['factory-method-name' => static::FACTORY_METHOD_NAME,])
             );
         }
 
@@ -238,7 +256,7 @@ class LocalDI
         if (!$method->getReturnType()
             || !(($object = $method->invokeArgs(null, $this->args)) instanceof $this->interfaceName)) {
             throw new FactoryMethodInvalidException(
-                "Объект, возвращаемый фабричным методом должен реализовывать интерфейс {$this->interfaceName}."
+                translate('di.fabric-result-not-implements', ['interface-name' => $this->interfaceName,])
             );
         }
 
