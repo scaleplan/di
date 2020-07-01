@@ -32,8 +32,8 @@ class ContainerNotImplementsException extends DependencyInjectionException
     public function __construct($container, $interface, string $message = '', int $code = 0, \Throwable $previous = null)
     {
         parent::__construct(
-            translate(static::MESSAGE, [':container' => $container, ':interface' => $interface]) ?:
-                strtr($message ?: static::MESSAGE, [':container' => $container, ':interface' => $interface]),
+            translate(static::MESSAGE, ['container' => $container, 'interface' => $interface]) ?:
+                strtr($message ?: static::MESSAGE, ['container' => $container, 'interface' => $interface]),
             $code,
             $previous
         );
