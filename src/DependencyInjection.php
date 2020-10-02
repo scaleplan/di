@@ -9,7 +9,7 @@ use Scaleplan\DependencyInjection\Exceptions\ContainerNotImplementsException;
 use Scaleplan\DependencyInjection\Exceptions\ContainerTypeNotSupportingException;
 use Scaleplan\DependencyInjection\Exceptions\DependencyInjectionException;
 use Scaleplan\DependencyInjection\Exceptions\ParameterMustBeInterfaceNameOrClassNameException;
-use Scaleplan\Helpers\FileHelper;
+use Scaleplan\File\FileHelper;
 use function Scaleplan\Translator\translate;
 
 /**
