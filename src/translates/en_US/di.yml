@@ -12,3 +12,4 @@ fabric-method-not-found: Fabric method not found.
 first-parameter-error: First parameter must be interface name or class name.
 return-not-implements: Return value must implements requested interface or inherists requested class.
 fabric-method-must-be: Class without public constructor must have fabric method :factory-method-name.
+not-enough-parameters: Insufficient parameters to create object.

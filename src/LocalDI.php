@@ -8,6 +8,7 @@ use Scaleplan\DependencyInjection\Exceptions\DependencyInjectionException;
 use Scaleplan\DependencyInjection\Exceptions\FactoryMethodInvalidException;
 use Scaleplan\DependencyInjection\Exceptions\FactoryMethodNotAllowedException;
 use Scaleplan\DependencyInjection\Exceptions\FactoryMethodNotFoundException;
+use Scaleplan\DependencyInjection\Exceptions\NotEnoughParametersException;
 use Scaleplan\DependencyInjection\Exceptions\ParameterMustBeInterfaceNameOrClassNameException;
 use Scaleplan\DependencyInjection\Exceptions\ReturnTypeMustImplementsInterfaceException;
 use function Scaleplan\Translator\translate;
@@ -56,7 +57,7 @@ class LocalDI
     /**
      * @param array $containers
      */
-    public static function init(array $containers) : void
+    public static function init(array $containers): void
     {
         static::$containers = $containers;
     }
@@ -64,7 +65,7 @@ class LocalDI
     /**
      * @param array $containers
      */
-    public static function addContainers(array $containers) : void
+    public static function addContainers(array $containers): void
     {
         static::$containers = array_merge(static::$containers, $containers);
     }
@@ -72,7 +73,7 @@ class LocalDI
     /**
      * @return array
      */
-    public static function getContainers() : array
+    public static function getContainers(): array
     {
         return static::$containers;
     }
@@ -96,8 +97,7 @@ class LocalDI
         array $args = [],
         bool $isStatic = false,
         string $factoryMethodName = null
-    )
-    {
+    ) {
         $this->interfaceName = $interfaceName;
         $this->args = $args;
         $this->isStatic = $isStatic;
@@ -108,13 +108,57 @@ class LocalDI
     }
 
     /**
+     * @param \ReflectionClass $refClass
+     *
+     * @throws DependencyInjectionException
+     * @throws Exceptions\ContainerTypeNotSupportingException
+     * @throws NotEnoughParametersException
+     * @throws ParameterMustBeInterfaceNameOrClassNameException
+     * @throws ReturnTypeMustImplementsInterfaceException
+     * @throws \ReflectionException
+     */
+    protected function addDIParameters(\ReflectionClass $refClass): void
+    {
+        if (!$constructor = $refClass->getConstructor()) {
+            return;
+        }
+
+        $constructorParameters = $refClass->getConstructor()->getParameters();
+        $constructorParametersCount = count($constructorParameters);
+        $argsCount = count($this->args);
+        if ($constructorParametersCount <= $argsCount) {
+            return;
+        }
+
+        for ($i = $argsCount; $i < $constructorParametersCount; $i++) {
+            $parameterType = $constructorParameters[$i]->getType();
+            if ($parameterType && !$parameterType->isBuiltin()) {
+                try {
+                    $functionName = $constructorParameters[$i]->isOptional()
+                        ? '\Scaleplan\DependencyInjection\get_container'
+                        : '\Scaleplan\DependencyInjection\get_required_container';
+                    $this->args[] = $functionName($parameterType->getName());
+                    continue;
+                } catch (NotEnoughParametersException $e) {
+                }
+            }
+
+            if (!$constructorParameters[$i]->isDefaultValueAvailable()) {
+                throw new NotEnoughParametersException();
+            }
+
+            $this->args[] = $constructorParameters[$i]->getDefaultValue();
+        }
+    }
+
+    /**
      * @throws DependencyInjectionException
      * @throws Exceptions\ContainerTypeNotSupportingException
      * @throws ParameterMustBeInterfaceNameOrClassNameException
      * @throws ReturnTypeMustImplementsInterfaceException
      * @throws \ReflectionException
      */
-    protected function checkInterface() : void
+    protected function checkInterface(): void
     {
         if (!interface_exists($this->interfaceName) && !class_exists($this->interfaceName)) {
             throw new ParameterMustBeInterfaceNameOrClassNameException(
@@ -171,6 +215,7 @@ class LocalDI
         }
 
         $refClass = new \ReflectionClass($containerClassName);
+        $this->addDIParameters($refClass);
         $factoryMethodName = $this->factoryMethodName ?? $containerFactoryMethodName;
         if ($factoryMethodName) {
             return $this->getContainerByFactory($refClass, $factoryMethodName);
@@ -240,8 +285,7 @@ class LocalDI
     protected function getContainerByFactory(
         \ReflectionClass $refClass,
         string $factoryMethodName
-    )
-    {
+    ) {
         if (!$refClass->hasMethod($factoryMethodName)) {
             throw new FactoryMethodNotFoundException(
                 translate('di.fabric-method-must-be', ['factory-method-name' => static::FACTORY_METHOD_NAME,])
